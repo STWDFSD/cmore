@@ -1,0 +1,180 @@
+// =========================================================
+// * Argon Dashboard 2 Pro - v2.0.0
+// =========================================================
+//
+// * Product Page: https://www.creative-tim.com/product/argon-dashboard-pro
+// * Copyright 2021 Creative Tim (https://www.creative-tim.com)
+//
+// Coded by www.creative-tim.com
+//
+// =========================================================
+//
+// * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+// Bootstrap Functions
+@import "argon-dashboard/bootstrap/functions";
+
+// Custom Variables
+@import "argon-dashboard/custom/variables";
+
+// Theme Variables
+@import "argon-dashboard/variables";
+
+// Bootstrap Core
+@import "argon-dashboard/bootstrap/bootstrap";
+
+// Theme Core
+@import "argon-dashboard/theme-pro";
+
+// Custom Variables
+@import "argon-dashboard/custom/styles";
+
+@font-face {
+  font-family: Jacques;
+  src: url("./Jacques.woff2");
+}
+@font-face {
+  font-family: Satoshi;
+  src: url("./Satoshi.woff2");
+}
+* {
+  font-family: Satoshi;
+}
+.Jacques {
+  font-family: Jacques;
+}
+.th-vertical {
+  writing-mode: sideways-lr;
+}
+.prefix-dollor {
+  position: relative;
+  padding-left: 20px !important;
+  &::before {
+    content: attr(unit);
+    position: absolute;
+    left: 12px;
+    opacity: 0.3;
+  }
+}
+*[contenteditable] {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: from-font;
+  outline: none;
+  padding: 2px 4px;
+  &:focus {
+    color: #000;
+    background-color: #f7ffab !important;
+  }
+}
+select {
+  border: none;
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: from-font;
+  outline: none;
+}
+.navbar-vertical.navbar-expand-xs {
+  z-index: 1000 !important;
+}
+
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-modal {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  min-width: 400px;
+  max-width: 600px;
+  width: 90vw;
+  padding: 0;
+  overflow: hidden;
+  animation: none;
+}
+.custom-modal-header {
+  color: #fff;
+  padding: 18px 24px;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.custom-modal-body {
+  padding: 32px 32px 24px 32px;
+}
+.slide-modal-enter-active {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide-modal-leave-active {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+}
+.btn-light {
+  background: #fff0ee;
+  color: #f88b8b;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 22px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.btn-light:hover {
+  background: #ffe2e2;
+}
+.btn-primary {
+  background: #0d8ce7;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 22px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.btn-primary:hover {
+  background: #0b7bc1;
+}
+.btn-danger {
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 22px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.btn-danger:hover {
+  background: #c62828;
+}
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
