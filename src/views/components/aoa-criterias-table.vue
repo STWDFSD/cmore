@@ -6,8 +6,6 @@ const props = defineProps({
 import { computed } from "vue";
 import { useStore } from "vuex";
 
-import ArgonButton from "@/components/ArgonButton.vue";
-
 import onChangeValue from "@/utils/onChangeValue";
 import formatWithSpaces from "@/utils/formatWithSpaces";
 import { deleteItem } from "@/actions/deleteItem";
@@ -64,10 +62,8 @@ function decreaseOthers(ID) {
     <table class="table table-bordered align-items-center mb-0">
       <thead>
         <tr class="text-secondary text-xs" style="background: #f8f9fa">
-          <th class="opacity-7 px-2 py-0 bg-white">
-            <argon-button color="success" variant="gradient" full-width>
-              {{ mainCriteria.Title }}
-            </argon-button>
+          <th class="text-center px-2 py-0">
+            <u>{{ mainCriteria.Title }}</u>
           </th>
           <th class="text-center opacity-7 px-1">Weight</th>
           <th class="text-center opacity-7 px-1">Points<br />for Weight</th>

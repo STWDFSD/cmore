@@ -55,12 +55,12 @@ function submitCriteria() {
 }
 // END Submit Add Modal
 
-function openTemplateModal() {
+function openTemplateModal(value) {
   newCriteriaTemplate.value = {
     Title: "",
     ID: 0,
   };
-  useExistingTemplate.value = false;
+  useExistingTemplate.value = value;
   showTemplateModal.value = true;
 }
 
@@ -117,18 +117,29 @@ async function submitTemplate() {
       store.commit("addCriteria", res);
 
       closeTemplateModal();
+
+      loadTemplates();
     });
   }
 }
 
 onMounted(() => {
+  loadTemplates();
+});
+
+function loadTemplates() {
   const keys = ["ID", "Title", "ProjectID"];
 
   getItems("Criterias", keys, "?$filter=ParentID eq 0").then((items) => {
-    items = [...new Set(items)];
-    criteriaTemplates.value = items;
+    const templates = [];
+    items.forEach((it) => {
+      if (!templates.some((it1) => it1.Title == it.Title)) {
+        templates.push(it);
+      }
+    });
+    criteriaTemplates.value = templates;
   });
-});
+}
 
 watch(
   project,
@@ -195,7 +206,7 @@ const onClick = (ID) => {
           variant="gradient"
           size="sm"
           :disabled="criterias == null"
-          @click="openTemplateModal"
+          @click="openTemplateModal(false)"
         >
           <span class="me-1 text-light">
             <i class="fa-solid fa-add"></i>
@@ -208,7 +219,7 @@ const onClick = (ID) => {
           variant="gradient"
           size="sm"
           :disabled="criterias == null"
-          @click="openTemplateModal"
+          @click="openTemplateModal(true)"
         >
           <span class="me-1 text-light">
             <i class="fa-solid fa-check"></i>
@@ -332,6 +343,7 @@ const onClick = (ID) => {
               class="form-control"
               v-model="newCriteriaTemplate.ID"
               :size="Math.min(Math.max(criteriaTemplates.length, 2), 5)"
+              style="overflow: auto"
             >
               <option
                 v-for="item in criteriaTemplates.filter((it) =>
