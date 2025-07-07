@@ -11,10 +11,10 @@ const project = computed(() => store.state.project);
 </script>
 
 <template>
-  <!-- Project overview card -->
-  <div class="card" id="project-overview">
-    <div class="card-header pb-0">
-      <div class="p-3 pb-0">
+  <!-- Project overview content -->
+  <div id="project-overview">
+    <div class="mb-4">
+      <div class="p-3 pt-2 pb-0">
         <i class="fa-solid fa-file-circle-check fa-2x me-2"></i>
         <b class="text-lg">
           {{ project.Title }}
@@ -37,7 +37,7 @@ const project = computed(() => store.state.project);
       </div>
       <hr />
     </div>
-    <div class="card-body pt-0">
+    <div class="pt-0">
       <div class="row">
         <!-- Alternatives list -->
         <div class="col-md-6">

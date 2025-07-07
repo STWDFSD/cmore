@@ -5,11 +5,14 @@
  * @returns {string} - Simplified formula string.
  */
 export default function simplifyFormula(expression) {
-  return expression
-    .replace(/({[^}]*})|([+\-*/])/g, (match, brace, operator) => {
-      if (brace) return brace; // Don't touch constants like {1}, {14}, etc.
-      return ` ${operator} `; // Add space around operators
-    })
-    .replace(/\s+/g, " ") // Normalize multiple spaces
-    .trim(); // Remove leading/trailing spaces
+  return (
+    expression
+      // Put space around all non-alphanumeric, non-whitespace, except inside {...}
+      .replace(/({\d+})|([^a-zA-Z0-9\s])/g, (match, brace, symbol) => {
+        if (brace) return brace; // leave {123} untouched
+        return ` ${symbol} `;
+      })
+      .replace(/\s+/g, " ") // normalize multiple spaces
+      .trim()
+  ); // remove leading/trailing spaces
 }

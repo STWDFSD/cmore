@@ -125,7 +125,7 @@ onMounted(() => {
   const keys = ["ID", "Title", "ProjectID"];
 
   getItems("Criterias", keys, "?$filter=ParentID eq 0").then((items) => {
-    console.log("criteriaTemplates", items);
+    items = [...new Set(items)];
     criteriaTemplates.value = items;
   });
 });
@@ -176,16 +176,20 @@ const onClick = (ID) => {
 </script>
 
 <template>
-  <div class="card" id="project-overview">
-    <div class="card-header pb-0">
-      <b>Criteria</b>
+  <div id="project-overview">
+    <div class="mb-4">
       <div class="p-3 pt-2">
         <i class="fa-solid fa-file-circle-check fa-2x me-2"></i>
         <b class="text-lg">{{ project.Title }}</b>
       </div>
     </div>
-    <div class="card-body pt-0">
-      <div v-if="(criterias || []).length == 0" class="mb-3">
+    <div class="pt-0">
+      <div v-if="criterias == null" class="mb-3">
+        <div class="text-center py-2">
+          <i class="fa fa-spin fa-ring"></i>
+        </div>
+      </div>
+      <template v-else-if="criterias.length == 0">
         <argon-button
           color="success"
           variant="gradient"
@@ -196,9 +200,22 @@ const onClick = (ID) => {
           <span class="me-1 text-light">
             <i class="fa-solid fa-add"></i>
           </span>
-          Add or Choose a Criteria Template
+          Add new
         </argon-button>
-      </div>
+        <argon-button
+          class="ms-3"
+          color="warning"
+          variant="gradient"
+          size="sm"
+          :disabled="criterias == null"
+          @click="openTemplateModal"
+        >
+          <span class="me-1 text-light">
+            <i class="fa-solid fa-check"></i>
+          </span>
+          Use Existing Template
+        </argon-button>
+      </template>
       <div v-else>
         <div class="mb-3">
           <span>This project is using</span>
@@ -211,7 +228,7 @@ const onClick = (ID) => {
           <div class="col-md-12">
             <aoa-graph :nodes="nodes" :edges="edges" :onClick="onClick" />
           </div>
-          <div class="col-md-12 text-right mb-3">
+          <div class="col-md-12 text-right my-3">
             <argon-button
               color="success"
               size="sm"

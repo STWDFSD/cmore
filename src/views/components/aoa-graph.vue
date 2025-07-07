@@ -1,5 +1,4 @@
 <template>
-  <!-- Graph canvas container -->
   <div :style="{ top: `-${canvasHeight}px` }">
     <canvas
       ref="canvas"
@@ -12,7 +11,6 @@
 </template>
 
 <script setup>
-// --- Imports and Props ---
 import { ref, onMounted, watch } from "vue";
 
 const props = defineProps({
@@ -21,15 +19,13 @@ const props = defineProps({
   onClick: Function,
 });
 
-// --- Graph Layout Constants ---
 const nodeWidth = 140;
-const nodeHeight = 50;
-const levelHeight = 100;
-const spacing = 40;
+const nodeHeight = 24; // smaller height
+const levelHeight = 200;
+const spacing = 20; // reduced vertical spacing
 const margin = 20;
+const verticalCompression = 0.8; // compress vertical spacing by 20%
 
-// --- Reactive State ---
-const animationIndex = ref(0);
 const canvasWidth = ref(0);
 const canvasHeight = ref(0);
 const flatNodes = ref([]);
@@ -38,7 +34,7 @@ const selectedNodeId = ref(null);
 const hoveredNodeId = ref(null);
 const canvas = ref(null);
 
-// --- Tree Building and Layout Functions ---
+// Tree building and layout
 function buildTree(nodes, edges) {
   const map = {};
   nodes.forEach((n) => (map[n.ID] = { ...n, children: [] }));
@@ -52,17 +48,17 @@ function buildTree(nodes, edges) {
 }
 
 function layoutTree(root) {
-  let x = 0;
+  let y = 0;
   const dfs = (node, depth = 0) => {
-    node.y = depth * levelHeight;
+    node.x = depth * levelHeight;
     if (!node.children.length) {
-      node.x = x * (nodeWidth + spacing);
-      x++;
+      node.y = y * (nodeHeight + spacing) * verticalCompression;
+      y++;
     } else {
       node.children.forEach((child) => dfs(child, depth + 1));
-      const first = node.children[0],
-        last = node.children.at(-1);
-      node.x = (first.x + last.x) / 2;
+      const first = node.children[0];
+      const last = node.children.at(-1);
+      node.y = (first.y + last.y) / 2;
     }
   };
   dfs(root);
@@ -78,75 +74,76 @@ function flattenTree(root) {
   return result;
 }
 
-// --- Canvas Size Calculation ---
 function computeCanvasSize() {
   let maxX = 0,
     maxY = 0;
   flatNodes.value.forEach((node) => {
-    const right = node.x + nodeWidth;
+    const right = node.x + nodeWidth + 32; // added extra space for description
     const bottom = node.y + nodeHeight;
     if (right > maxX) maxX = right;
     if (bottom > maxY) maxY = bottom;
   });
-  canvasWidth.value = maxX + margin * 2;
-  canvasHeight.value = maxY + margin * 2;
+  canvasWidth.value = Math.min(maxX + margin * 2, 1800);
+  canvasHeight.value = Math.min(maxY + margin * 2, 600); // reduced max canvas height
 }
 
-// --- Drawing Functions ---
+// Draw functions
 function drawNode(ctx, node) {
   const x = node.x + margin;
   const y = node.y + margin;
   const { ID, Title, Description } = node;
-  if (selectedNodeId.value === ID) {
-    ctx.fillStyle = "#228833";
-  } else if (hoveredNodeId.value === ID) {
-    ctx.fillStyle = "#005577";
-  } else {
-    ctx.fillStyle = "#004466";
-  }
-  ctx.fillRect(x, y, nodeWidth, nodeHeight);
+
+  // Node background
+  ctx.fillStyle =
+    selectedNodeId.value === ID
+      ? "#228833"
+      : hoveredNodeId.value === ID
+        ? "#005577"
+        : "#2b70c9";
+
+  const radius = 8;
+  roundedRect(ctx, x, y, nodeWidth, nodeHeight, radius);
+  ctx.fill();
+
+  // Title (single line centered with ellipsis)
   ctx.fillStyle = "white";
-  ctx.font = "12px Satoshi";
+  ctx.font = "bold 13px Arial";
   ctx.textAlign = "center";
-  const labelShort = getEllipsedText(ctx, Title, nodeWidth - 10);
-  ctx.fillText(labelShort, x + nodeWidth / 2, y + 20);
-  ctx.fillStyle = "#e0e0e0";
-  ctx.fillRect(x + 20, y + 30, 100, 15);
-  ctx.fillStyle = "black";
-  ctx.font = "12px Satoshi";
-  ctx.fillText(Description, x + nodeWidth / 2, y + 42);
+  ctx.textBaseline = "middle";
+
+  const maxTitleWidth = nodeWidth - 10;
+  const displayedTitle = truncateText(ctx, Title, maxTitleWidth);
+
+  ctx.fillText(displayedTitle, x + nodeWidth / 2, y + nodeHeight / 2);
+
+  // Description (to the right, vertically centered)
+  ctx.fillStyle = "#444";
+  ctx.font = "12px Arial";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  const descX = x + nodeWidth + 10; // 10px padding from node box
+  const descY = y + nodeHeight / 2;
+  ctx.fillText(Description, descX, descY);
 }
 
-function getEllipsedText(ctx, text, maxWidth) {
+function truncateText(ctx, text, maxWidth) {
   if (ctx.measureText(text).width <= maxWidth) return text;
-  while (text.length > 0) {
-    text = text.slice(0, -1);
-    if (ctx.measureText(text + "…").width <= maxWidth) return text + "…";
+  let truncated = text;
+  while (
+    ctx.measureText(truncated + "…").width > maxWidth &&
+    truncated.length > 0
+  ) {
+    truncated = truncated.slice(0, -1);
   }
-  return "…";
+  return truncated + "…";
 }
 
 function drawEdge(ctx, from, to) {
   ctx.strokeStyle = "#444";
   ctx.beginPath();
-  ctx.moveTo(from.x + nodeWidth / 2 + margin, from.y + nodeHeight + margin);
-  ctx.lineTo(to.x + nodeWidth / 2 + margin, to.y + margin);
+  ctx.moveTo(from.x + nodeWidth + margin, from.y + nodeHeight / 2 + margin);
+  ctx.lineTo(to.x + margin, to.y + nodeHeight / 2 + margin);
   ctx.stroke();
-}
-
-// --- Animation and Redraw ---
-function animateDrawing(ctx) {
-  ctx.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
-  props.edges.forEach(([fromId, toId]) => {
-    drawEdge(ctx, idToNode.value[fromId], idToNode.value[toId]);
-  });
-  for (let i = 0; i <= animationIndex.value; i++) {
-    drawNode(ctx, flatNodes.value[i]);
-  }
-  if (animationIndex.value < flatNodes.value.length - 1) {
-    animationIndex.value++;
-    requestAnimationFrame(() => animateDrawing(ctx));
-  }
 }
 
 function redrawCanvas() {
@@ -158,7 +155,21 @@ function redrawCanvas() {
   flatNodes.value.forEach((node) => drawNode(ctx, node));
 }
 
-// --- Mouse Events ---
+function roundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// Interaction
 function handleMouseMove(event) {
   const rect = canvas.value.getBoundingClientRect();
   const x = event.clientX - rect.left - margin;
@@ -175,63 +186,45 @@ function handleMouseMove(event) {
 }
 
 function handleCanvasClick(event) {
-  const ID = ((event) => {
-    const rect = canvas.value.getBoundingClientRect();
-    const x = event.clientX - rect.left - margin;
-    const y = event.clientY - rect.top - margin;
-    for (const node of flatNodes.value) {
-      if (
-        x >= node.x &&
-        x <= node.x + nodeWidth &&
-        y >= node.y &&
-        y <= node.y + nodeHeight
-      ) {
-        selectedNodeId.value = node.ID;
-        redrawCanvas();
-
-        return node.ID;
-      }
+  const rect = canvas.value.getBoundingClientRect();
+  const x = event.clientX - rect.left - margin;
+  const y = event.clientY - rect.top - margin;
+  for (const node of flatNodes.value) {
+    if (
+      x >= node.x &&
+      x <= node.x + nodeWidth &&
+      y >= node.y &&
+      y <= node.y + nodeHeight
+    ) {
+      selectedNodeId.value = node.ID;
+      redrawCanvas();
+      if (props.onClick) props.onClick(node.ID);
+      return;
     }
-    selectedNodeId.value = null;
-    redrawCanvas();
-    return "";
-  })(event);
-
-  if (props.onClick) props.onClick(ID);
+  }
+  selectedNodeId.value = null;
+  redrawCanvas();
+  if (props.onClick) props.onClick("");
 }
 
-// --- Lifecycle: Build and Draw Graph ---
-onMounted(() => {
-  if (!props.nodes.length || !props.edges.length) {
-    canvasWidth.value = 0;
-    canvasHeight.value = 0;
-    return;
-  }
-  const ctx = canvas.value.getContext("2d");
+// Main render
+function renderGraph() {
+  if (!props.nodes.length || !props.edges.length) return;
+
   const root = buildTree(props.nodes, props.edges);
   layoutTree(root);
   flatNodes.value = flattenTree(root);
   idToNode.value = Object.fromEntries(flatNodes.value.map((n) => [n.ID, n]));
   computeCanvasSize();
-  animateDrawing(ctx);
-});
 
-watch([() => props.nodes, () => props.edges], ([newNodes, newEdges]) => {
-  if (!newNodes.length || !newEdges.length) {
-    canvasWidth.value = 0;
-    canvasHeight.value = 0;
-    return;
-  }
+  requestAnimationFrame(() => {
+    redrawCanvas();
+  });
+}
 
-  const ctx = canvas.value.getContext("2d");
-  const root = buildTree(newNodes, newEdges);
-  layoutTree(root);
-  flatNodes.value = flattenTree(root);
-  idToNode.value = Object.fromEntries(flatNodes.value.map((n) => [n.ID, n]));
-  computeCanvasSize();
-  animationIndex.value = 0;
-  animateDrawing(ctx);
-});
+// Lifecycle
+onMounted(renderGraph);
+watch([() => props.nodes, () => props.edges], renderGraph);
 </script>
 
 <style scoped>

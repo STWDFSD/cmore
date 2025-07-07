@@ -30,16 +30,15 @@ const getCriteriaValue = (AID, CID) => {
 </script>
 
 <template>
-  <!-- MOE Score card -->
-  <div class="card" id="moe-score">
-    <div class="card-header pb-0">
-      <b>MOE Score</b>
+  <!-- MOE Score content -->
+  <div id="moe-score">
+    <div class="mb-4">
       <div class="p-3 pt-2">
         <i class="fa-solid fa-file-circle-check fa-2x me-2"></i>
         <b class="text-lg">{{ project.Title }}</b>
       </div>
     </div>
-    <div class="card-body pt-0">
+    <div class="pt-0">
       <!-- Chart for alternatives -->
       <div class="text-center mb-3" v-if="alternatives.length">
         <aoa-moe-score-chart />

@@ -85,20 +85,8 @@ function deleteAlternative(ID) {
       <thead>
         <tr class="text-secondary text-xs" style="background: #f8f9fa">
           <th class="opacity-7">Alternative</th>
-          <th class="text-center opacity-7 px-1">
-            <a href="#moe-score">
-              <i class="fa fa-eye mb-1"></i>
-              <br />
-              MOE Score
-            </a>
-          </th>
-          <th class="text-center opacity-7 px-1">
-            <a href="#total-cost">
-              <i class="fa fa-eye mb-1"></i>
-              <br />
-              Total Cost
-            </a>
-          </th>
+          <th class="text-center opacity-7 px-1">MOE Score</th>
+          <th class="text-center opacity-7 px-1">Total Cost</th>
           <th class="text-center opacity-7 px-1">MoE / Cost</th>
           <th class="text-center opacity-7 px-1">Rank</th>
           <th></th>
